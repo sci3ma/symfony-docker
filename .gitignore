@@ -1,0 +1,3 @@
+./docker/minio/storage/*
+!./docker/minio/storage/.gitignore
+.idea

@@ -1,0 +1,87 @@
+version: '3.9'
+
+services:
+    nginx:
+        container_name: ${NGINX_CONTAINER_NAME}
+        restart: on-failure
+        build:
+            context: .
+            dockerfile: ../docker/docker/nginx/Dockerfile
+        volumes:
+            - ./:/var/www/symfony:cached
+            - ./var/log/nginx/:/var/log/nginx:delegated
+        ports:
+            - 8000:80
+            - 443:443
+        depends_on:
+            - ${PHP_CONTAINER_NAME}
+        networks:
+            - symfony
+
+    php:
+        container_name: ${PHP_CONTAINER_NAME}
+        restart: on-failure
+        build:
+            context: .
+            dockerfile: ./docker/php-fpm/Dockerfile
+            args:
+                PHP_VERSION: ${PHP_VERSION}
+                APCU_VERSION: ${APCU_VERSION}
+                XDEBUG_VERSION: ${XDEBUG_VERSION}
+                XDEBUG_HOST: ${XDEBUG_HOST}
+        volumes:
+            - ./:/var/www/symfony:cached
+            - ~/.ssh:/root/.ssh
+        depends_on:
+            - ${DATABASE_CONTAINER_NAME}
+        networks:
+            - symfony
+
+    database:
+        container_name: ${DATABASE_CONTAINER_NAME}
+        restart: on-failure
+        build:
+            context: .
+            dockerfile: ./docker/database/Dockerfile
+            args:
+                MYSQL_VERSION: ${MYSQL_VERSION}
+        command: ["--default-authentication-plugin=mysql_native_password"]
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: symfony
+            MYSQL_USER: dbuser
+            MYSQL_PASSWORD: password
+        ports:
+            - 33060:3306
+        networks:
+            - symfony
+
+    minio:
+        container_name: ${S3_CONTAINER_NAME}
+        restart: on-failure
+        command: server /storage
+        build:
+            context: .
+            dockerfile: ./docker/minio/Dockerfile
+        volumes:
+            - ./docker/minio/storage:/storage
+        environment:
+            MINIO_ACCESS_KEY: ${S3_KEY}
+            MINIO_SECRET_KEY: ${S3_SECRET}
+        ports:
+            - 8001:9000
+        networks:
+            - symfony
+
+    mailhog:
+        container_name: ${MAILHOG_CONTAINER_NAME}
+        restart: on-failure
+        image: mailhog/mailhog
+        ports:
+            - 1025:1025
+            - 8025:8025
+        networks:
+            - symfony
+
+networks:
+    symfony:
