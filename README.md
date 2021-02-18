@@ -1,7 +1,7 @@
 # Symfony Docker
 
 Complete Docker stack for Symfony with NGINX, PHP, MySQL and MinIO, using docker-compose tool.
-
+```
 +-----------+-----------+----------+----------+----------+
 |           |           |          |          |          |
 |   NGINX   |  PHP-FPM  |   MySQL  |   MinIO  |  MailHog |
@@ -15,6 +15,7 @@ Complete Docker stack for Symfony with NGINX, PHP, MySQL and MinIO, using docker
 |                         Host OS                        |
 |                                                        |
 +--------------------------------------------------------+
+```
 
 ## Table of Contents
 1. [Requirements](#requirements)
@@ -92,6 +93,7 @@ $ docker-compose up -d
 ```
 When containers are up and running create bucket and add policy using MinIO web interface: `http://127.0.0.1:8001`. To log in use S3_KEY and S3_SECRET values.
 
+Put your Symfony project next to Symfony Docker.
 To setup database connection in Symfony just add in `.env` file:
 ```dotenv
 DATABASE_URL=mysql://dbuser:password@database:3306/symfony?serverVersion={MYSQL_VERSION}
