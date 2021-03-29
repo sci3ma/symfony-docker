@@ -51,6 +51,8 @@ services:
             MYSQL_DATABASE: symfony
             MYSQL_USER: dbuser
             MYSQL_PASSWORD: password
+        volumes:
+            - ./docker/database/data:/var/lib/mysql
         ports:
             - 33060:3306
         networks:
