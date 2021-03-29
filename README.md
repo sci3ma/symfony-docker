@@ -70,8 +70,8 @@ XDEBUG_HOST=0.0.0.0                 # IP address of your host
 - NGINX works on port `8000`, `http://127.0.0.1:8000`
 - MySQL works on port `3306` inside docker network and on port `33060` outside docker network.
 - MinIO works on port `8001`, `http://127.0.0.1:8001`
-- MailHog web works on port `8025`, `http://127.0.0.1:8025`. SMTP works on port `1025`, `smtp://127.0.0.1:1025`
-- Xdebug works on port `9001`, idekey is `PHPSTORM`
+- MailHog web works on port `8025`, `http://127.0.0.1:8025`. SMTP works on port `1025`, `smtp://[mailhog_container_name]:1025`
+- Xdebug works on port `9001`, idkey is `PHPSTORM`
 ```
   Name                Command               State                       Ports                     
 --------------------------------------------------------------------------------------------------
@@ -143,3 +143,4 @@ docker/console [command]   # similar to: bin/console [command]
 - implement container with Elasticsearch
 - implement container with message queuing service (RabbitMQ/AWS SQS)
 - improve Xdebug configuration to setup client host IP address automatically
+- improve files permissions created by docker containers
