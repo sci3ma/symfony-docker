@@ -65,17 +65,22 @@ MAILHOG_CONTAINER_NAME=mailhog      # MailHog container name
 XDEBUG_VERSION=3.0.2                # Xdebug version (make sure is supported by PHP version https://xdebug.org/docs/compat)
 XDEBUG_HOST=0.0.0.0                 # IP address of your host
 ```
+Export you user ID and group ID:
+```bash
+$ export UID=${UID}
+$ export GID=${GID}
+```
 
 ### Ports
 - NGINX works on port `8000`, `http://127.0.0.1:8000`
-- MySQL works on port `3306` inside docker network and on port `33060` outside docker network.
+- MySQL works on port `3306` inside docker network and on port `33069` outside docker network.
 - MinIO works on port `8001`, `http://127.0.0.1:8001`
 - MailHog web works on port `8025`, `http://127.0.0.1:8025`. SMTP works on port `1025`, `smtp://[mailhog_container_name]:1025`
 - Xdebug works on port `9001`, idkey is `PHPSTORM`
 ```
   Name                Command               State                       Ports                     
 --------------------------------------------------------------------------------------------------
-database   docker-entrypoint.sh --def ...   Up      0.0.0.0:33060->3306/tcp, 33060/tcp            
+database   docker-entrypoint.sh --def ...   Up      0.0.0.0:33069->3306/tcp, 33069/tcp            
 mailhog    MailHog                          Up      0.0.0.0:1025->1025/tcp, 0.0.0.0:8025->8025/tcp
 minio      /usr/bin/docker-entrypoint ...   Up      0.0.0.0:8001->9000/tcp                        
 nginx      /docker-entrypoint.sh ngin ...   Up      0.0.0.0:443->443/tcp, 0.0.0.0:8000->80/tcp    
@@ -143,4 +148,3 @@ docker/console [command]   # similar to: bin/console [command]
 - implement container with Elasticsearch
 - implement container with message queuing service (RabbitMQ/AWS SQS)
 - improve Xdebug configuration to setup client host IP address automatically
-- improve files permissions created by docker containers

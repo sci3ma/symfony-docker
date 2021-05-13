@@ -6,7 +6,7 @@ services:
         restart: on-failure
         build:
             context: .
-            dockerfile: ./docker/docker/nginx/Dockerfile
+            dockerfile: ./docker/nginx/Dockerfile
         volumes:
             - ./:/var/www/symfony:cached
             - ./var/log/nginx/:/var/log/nginx:delegated
@@ -20,6 +20,7 @@ services:
 
     php:
         container_name: ${PHP_CONTAINER_NAME}
+        user: ${UID}:${GID}
         restart: on-failure
         build:
             context: .
@@ -39,6 +40,7 @@ services:
 
     database:
         container_name: ${DATABASE_CONTAINER_NAME}
+        user: ${UID}:${GID}
         restart: on-failure
         build:
             context: .
@@ -54,12 +56,13 @@ services:
         volumes:
             - ./docker/database/data:/var/lib/mysql
         ports:
-            - 33060:3306
+            - 33069:3306
         networks:
             - symfony
 
     minio:
         container_name: ${S3_CONTAINER_NAME}
+        user: ${UID}:${GID}
         restart: on-failure
         command: server /storage
         build:
@@ -77,6 +80,7 @@ services:
 
     mailhog:
         container_name: ${MAILHOG_CONTAINER_NAME}
+        user: ${UID}:${GID}
         restart: on-failure
         image: mailhog/mailhog
         ports:
