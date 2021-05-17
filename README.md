@@ -64,11 +64,20 @@ S3_SECRET=s3_secret                 # MinIO secret/password
 MAILHOG_CONTAINER_NAME=mailhog      # MailHog container name
 XDEBUG_VERSION=3.0.2                # Xdebug version (make sure is supported by PHP version https://xdebug.org/docs/compat)
 XDEBUG_HOST=0.0.0.0                 # IP address of your host
+DOCKER_HOST_UID=0                   # Your system user ID (UID)
+DOCKER_HOST_GID=0                   # Your system group ID (GID)
 ```
-Export you user ID and group ID:
+Check your user ID:
 ```bash
-$ export UID=${UID}
-$ export GID=${GID}
+$ id -u
+# or
+$ id -u <username>
+```
+Check your group ID:
+```bash
+$ id -g
+# or
+$ id -g <username>
 ```
 
 ### Ports
@@ -145,6 +154,7 @@ docker/console [command]   # similar to: bin/console [command]
 
 
 ### To do
-- implement container with Elasticsearch
-- implement container with message queuing service (RabbitMQ/AWS SQS)
-- improve Xdebug configuration to setup client host IP address automatically
+- add container with Elasticsearch
+- add container with message queuing service (RabbitMQ/AWS SQS)
+- add container with redis
+- improve Xdebug configuration to set up client host IP address automatically

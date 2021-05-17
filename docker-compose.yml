@@ -20,7 +20,7 @@ services:
 
     php:
         container_name: ${PHP_CONTAINER_NAME}
-        user: ${UID}:${GID}
+        user: ${DOCKER_HOST_UID}:${DOCKER_HOST_GID}
         restart: on-failure
         build:
             context: .
@@ -40,7 +40,7 @@ services:
 
     database:
         container_name: ${DATABASE_CONTAINER_NAME}
-        user: ${UID}:${GID}
+        user: ${DOCKER_HOST_UID}:${DOCKER_HOST_GID}
         restart: on-failure
         build:
             context: .
@@ -62,7 +62,7 @@ services:
 
     minio:
         container_name: ${S3_CONTAINER_NAME}
-        user: ${UID}:${GID}
+        user: ${DOCKER_HOST_UID}:${DOCKER_HOST_GID}
         restart: on-failure
         command: server /storage
         build:
@@ -80,7 +80,7 @@ services:
 
     mailhog:
         container_name: ${MAILHOG_CONTAINER_NAME}
-        user: ${UID}:${GID}
+        user: ${DOCKER_HOST_UID}:${DOCKER_HOST_GID}
         restart: on-failure
         image: mailhog/mailhog
         ports:
