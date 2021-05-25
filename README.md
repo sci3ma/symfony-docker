@@ -118,7 +118,7 @@ MYSQL_DATABASE: symfony
 MYSQL_USER: dbuser
 MYSQL_PASSWORD: password
 MYSQL_HOST: [container_name]
-MYSQL_PORT: 33060
+MYSQL_PORT: 33069
 ```
 
 
