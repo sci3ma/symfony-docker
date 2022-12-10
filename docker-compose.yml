@@ -2,51 +2,43 @@ version: '3.9'
 
 services:
     nginx:
-        container_name: ${NGINX_CONTAINER_NAME}
+        container_name: ${NGINX_CONTAINER_NAME:-nginx}
         restart: on-failure
         build:
             context: .
             dockerfile: ./docker/nginx/Dockerfile
         volumes:
-            - ./:/var/www/symfony:cached
+            - ./app/:/var/www/symfony:cached
             - ./var/log/nginx/:/var/log/nginx:delegated
         ports:
-            - 8000:80
-            - 443:443
+            - "8000:80"
+            - "1443:443"
         depends_on:
-            - ${PHP_CONTAINER_NAME}
+            - ${PHP_CONTAINER_NAME:-php}
         networks:
             - symfony
 
     php:
-        container_name: ${PHP_CONTAINER_NAME}
-        user: ${DOCKER_HOST_UID}:${DOCKER_HOST_GID}
+        container_name: ${PHP_CONTAINER_NAME:-php}
+        user: ${DOCKER_HOST_UID:-1000}:${DOCKER_HOST_GID:-1000}
         restart: on-failure
         build:
             context: .
             dockerfile: ./docker/php-fpm/Dockerfile
-            args:
-                PHP_VERSION: ${PHP_VERSION}
-                APCU_VERSION: ${APCU_VERSION}
-                XDEBUG_VERSION: ${XDEBUG_VERSION}
-                XDEBUG_HOST: ${XDEBUG_HOST}
         volumes:
-            - ./:/var/www/symfony:cached
-            - ~/.ssh:/root/.ssh
+            - ./app/:/var/www/symfony:cached
         depends_on:
-            - ${DATABASE_CONTAINER_NAME}
+            - ${DATABASE_CONTAINER_NAME:-database}
         networks:
             - symfony
 
     database:
-        container_name: ${DATABASE_CONTAINER_NAME}
-        user: ${DOCKER_HOST_UID}:${DOCKER_HOST_GID}
+        container_name: ${DATABASE_CONTAINER_NAME:-database}
+        user: ${DOCKER_HOST_UID:-1000}:${DOCKER_HOST_GID:-1000}
         restart: on-failure
         build:
             context: .
             dockerfile: ./docker/database/Dockerfile
-            args:
-                MYSQL_VERSION: ${MYSQL_VERSION}
         command: ["--default-authentication-plugin=mysql_native_password"]
         environment:
             MYSQL_ROOT_PASSWORD: root
@@ -56,36 +48,73 @@ services:
         volumes:
             - ./docker/database/data:/var/lib/mysql
         ports:
-            - 33069:3306
+            - "13306:3306"
         networks:
             - symfony
 
     minio:
-        container_name: ${S3_CONTAINER_NAME}
-        user: ${DOCKER_HOST_UID}:${DOCKER_HOST_GID}
+        container_name: ${S3_CONTAINER_NAME:-minio}
+        user: ${DOCKER_HOST_UID:-1000}:${DOCKER_HOST_GID:-1000}
         restart: on-failure
-        command: server /storage
+        command: server /storage --console-address ":9090"
         build:
             context: .
             dockerfile: ./docker/minio/Dockerfile
         volumes:
             - ./docker/minio/storage:/storage
         environment:
-            MINIO_ACCESS_KEY: ${S3_KEY}
-            MINIO_SECRET_KEY: ${S3_SECRET}
+            MINIO_ROOT_USER: ${STORAGE_LOGIN:-storage_login}
+            MINIO_ROOT_PASSWORD: ${STORAGE_PASSWORD:-storage_password}
         ports:
-            - 8001:9000
+            - "9000:9000"
+            - "9090:9090"
         networks:
             - symfony
 
     mailhog:
-        container_name: ${MAILHOG_CONTAINER_NAME}
-        user: ${DOCKER_HOST_UID}:${DOCKER_HOST_GID}
+        container_name: ${MAILHOG_CONTAINER_NAME:-mailhog}
+        user: ${DOCKER_HOST_UID:-1000}:${DOCKER_HOST_GID:-1000}
         restart: on-failure
         image: mailhog/mailhog
         ports:
-            - 1025:1025
-            - 8025:8025
+            - "1025:1025"
+            - "8025:8025"
+        networks:
+            - symfony
+
+    redis:
+        container_name: ${REDIS_CONTAINER_NAME:-redis}
+        restart: on-failure
+        image: redis:alpine3.17
+        ports:
+            - "16379:6379"
+        networks:
+            - symfony
+
+    rabbit_mq:
+        container_name: ${RABBIT_MQ_CONTAINER_NAME:-rabbit_mq}
+        restart: on-failure
+        image: rabbitmq:3-management-alpine
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        networks:
+            - symfony
+
+    elasticsearch:
+        container_name: ${ELASTICSEARCH_CONTAINER_NAME:-elasticsearch}
+        user: ${DOCKER_HOST_UID:-1000}:${DOCKER_HOST_GID:-1000}
+        restart: on-failure
+        image: elasticsearch:8.5.2
+        volumes:
+            - ./docker/elasticsearch/data:/usr/share/elasticsearch/data
+        environment:
+            - discovery.type=single-node
+            - bootstrap.memory_lock=true
+            - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+            - "ELASTIC_PASSWORD=password"
+        ports:
+            - 9200:9200
         networks:
             - symfony
 

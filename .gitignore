@@ -1,3 +1,9 @@
 ./docker/minio/storage/*
 !./docker/minio/storage/.gitignore
+./docker/elasticsearch/data/*
+!./docker/elasticsearch/data/.gitignore
+./docker/database/data/*
+!./docker/database/data/.gitignore
 .idea
+./var
+./app/*
