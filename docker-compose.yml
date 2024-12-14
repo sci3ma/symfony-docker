@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
     nginx:
         container_name: ${NGINX_CONTAINER_NAME:-nginx}
@@ -25,8 +23,13 @@ services:
         build:
             context: .
             dockerfile: ./docker/php-fpm/Dockerfile
+        environment:
+            PHP_IDE_CONFIG: 'serverName=localhost'
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
         volumes:
             - ./app/:/var/www/symfony:cached
+            - ./app/var/coverage:/opt/phpstorm-coverage/
         depends_on:
             - ${DATABASE_CONTAINER_NAME:-database}
         networks:
@@ -39,7 +42,7 @@ services:
         build:
             context: .
             dockerfile: ./docker/database/Dockerfile
-        command: ["--default-authentication-plugin=mysql_native_password"]
+        command: ["--mysql-native-password=ON"]
         environment:
             MYSQL_ROOT_PASSWORD: root
             MYSQL_DATABASE: symfony
@@ -47,27 +50,24 @@ services:
             MYSQL_PASSWORD: password
         volumes:
             - ./docker/database/data:/var/lib/mysql
+            - ./docker/database/init:/docker-entrypoint-initdb.d
         ports:
             - "13306:3306"
         networks:
             - symfony
 
-    minio:
-        container_name: ${S3_CONTAINER_NAME:-minio}
+    localstack:
+        container_name: ${DATABASE_CONTAINER_NAME:-localstack}
         user: ${DOCKER_HOST_UID:-1000}:${DOCKER_HOST_GID:-1000}
-        restart: on-failure
-        command: server /storage --console-address ":9090"
-        build:
-            context: .
-            dockerfile: ./docker/minio/Dockerfile
-        volumes:
-            - ./docker/minio/storage:/storage
+        image: localstack/localstack:4.0
         environment:
-            MINIO_ROOT_USER: ${STORAGE_LOGIN:-storage_login}
-            MINIO_ROOT_PASSWORD: ${STORAGE_PASSWORD:-storage_password}
+            SERVICES: lambda,s3,sns,sqs
+        volumes:
+            - ./docker/localstack/data:/var/lib/localstack
+            - /var/run/docker.sock:/var/run/docker.sock
         ports:
-            - "9000:9000"
-            - "9090:9090"
+            - "4566:4566"
+            - "4510-4559:4510-4559"
         networks:
             - symfony
 
@@ -85,7 +85,7 @@ services:
     redis:
         container_name: ${REDIS_CONTAINER_NAME:-redis}
         restart: on-failure
-        image: redis:alpine3.17
+        image: redis:alpine3.20
         ports:
             - "16379:6379"
         networks:
@@ -94,7 +94,7 @@ services:
     rabbit_mq:
         container_name: ${RABBIT_MQ_CONTAINER_NAME:-rabbit_mq}
         restart: on-failure
-        image: rabbitmq:3-management-alpine
+        image: rabbitmq:3.9.29-management-alpine
         ports:
             - "5672:5672"
             - "15672:15672"
@@ -114,7 +114,19 @@ services:
             - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
             - "ELASTIC_PASSWORD=password"
         ports:
-            - 9200:9200
+            - "9200:9200"
+        networks:
+            - symfony
+
+    keycloak:
+        container_name: ${KEYCLOAK_CONTAINER_NAME:-keycloak}
+        image: quay.io/keycloak/keycloak:26.0
+        command: [ "start-dev" ]
+        environment:
+            KC_BOOTSTRAP_ADMIN_USERNAME: admin
+            KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+        ports:
+            - "8080:8080"
         networks:
             - symfony
 

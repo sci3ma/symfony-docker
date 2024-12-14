@@ -1,0 +1,2 @@
+CREATE DATABASE IF NOT EXISTS `symfony_test`;
+GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@'%';
