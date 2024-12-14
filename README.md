@@ -1,6 +1,6 @@
 # Symfony Docker
 
-Complete Docker stack for Symfony with NGINX, PHP, MySQL, MinIO, MailHog, Redis, RabbitMQ and Elasticsearch using docker-compose tool.
+Complete Docker stack for Symfony with NGINX, PHP, MySQL, LocalStack, MailHog, Redis, RabbitMQ, Elasticsearch and Keycloak using docker-compose tool.
 ```
 +-------+---------+-------+------------+---------+-------+----------+---------------+----------+ 
 |       |         |       |            |         |       |          |               |          |
